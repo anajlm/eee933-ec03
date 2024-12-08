@@ -58,6 +58,54 @@ Se decidirmos pela rejeição da hipótese nula e as premissas do teste forem va
 
 ## 1.2. Tamanho amostral
 
+### 1.2.1. Estimando o número de instâncias (blocos)
+
+Choosing the sample size, or the number of blocks to run,
+is an important decision when using an RCBD. Increasing the number of blocks increases
+the number of replicates and the number of error degrees of freedom, making design more
+sensitive.
+
+Escolher o tamanho da amostra ou o número de blocos para rodar é uma decisão importante ao usar um Desenho de Bloqueamento Completo Randomizado (RCBD). Aumentar o número de blocos aumenta o número de replicações e os graus de liberdade de erro, tornando o design mais sensível.
+
+Para determinar o número de blocos para o experimento, 
+
+O tamanho amostral para este teste pode ser calculado como o menor número inteiro tal que π∗π∗ seja igual ou maior do que o poder desejado.
+
+### Hypothesis under Alternative H1
+
+Sob a hipótese alternativa H1, a estatística \( t_0 \) segue uma distribuição t não central (Mathews, 2010) com parâmetro de não centralidade:
+
+\[
+ncp = \frac{(\mu_D - \mu_0) \sqrt{N}}{\hat{\sigma}_\Phi} = \frac{\delta \sqrt{N}}{\hat{\sigma}_\Phi} = d \sqrt{N}.
+\]
+
+Assumindo uma medida de relevância mínima \( d^* = | \delta^* | / \sigma_\Phi \), o poder do teste é dado pela integral da distribuição t não central com \( ncp^* = d^* \sqrt{N} \) sobre os valores de \( t_0 \) para os quais a hipótese nula \( H_0 \) é rejeitada.
+
+O tamanho da amostra para este teste pode ser calculado como o menor inteiro tal que a potência \( \pi^* \) é igual ou maior que a potência desejada. No cao da hipótese alternativa unilateral, temos que:
+
+
+
+```{r blocos,message=FALSE}
+d = 0.5        # Mínima diferença de importância prática (padronizada)
+alpha <- 0.05  # Nível de significância
+p <- 1 - alpha # Nível de confiança
+
+n <- 2
+power <- 0
+while (power < 0.8)
+{
+  df <- n - 1         # n - 1 graus de liberdade
+  ncp <- d * sqrt(n)  # Non-centrality parameter
+  
+  power <- pt(qt(p,df), df, ncp=ncp, lower.tail=F)
+  n <- n + 1
+}
+n
+power
+```
+
+### 1.2.2. Estimando o número de repetições por bloco
+
 ```{r repeticoes,message=FALSE}
 
 ```
