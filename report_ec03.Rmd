@@ -1,7 +1,7 @@
 ---
-title: 'Estudo de Caso 2 - Avaliação e comparação do retorno médio de ações'
-author: "Ana Júlia Martins, Antônio Carlos da Anunciação, Melchior Augusto Syrio de Melo"
-date: "25 de novembro de 2024"
+title: 'Estudo de Caso 3 - Comparação de desempenho de duas configurações de um algoritmo de otimização'
+author: "Ana Júlia de Lima Martins, Antônio Carlos da Anunciação, Melchior Augusto Syrio de Melo"
+date: "16 de dezembro de 2024"
 output:
   pdf_document:
     fig_caption: yes
@@ -33,29 +33,34 @@ if (!require(reshape2, quietly = TRUE)){
 if (!require(multcomp, quietly = TRUE)){
       install.packages("multcomp")
 }
-if (!require(ExpDE, quietly = TRUE)){
-      install.packages("ExpDE")
-}
-if (!require(smoof, quietly = TRUE)){
-      install.packages("smoof")
-}
 ```
 ## Resumo
-This document provides a template for the Case Study reports. Reports should always start a short executive summary (call it an _Abstract_ if you want) to give the reader a general idea of the topic under investigation, the kind of analysis performed, the results obtained, and the general recommendations of the authors.
+
+Este relatório descreve uma análise estatística do desempenho de duas configurações distintas de um algoritmo de otimização baseado em evolução diferencial (DE). Neste experimento, aplicou-se um Experimento Completamente Aleatorizado com Blocos (RCBD) com o intuito de avaliar o desempenho das duas configurações em diferentes instâncias do problema. A análise teve como objetivo identificar se há diferenças estatisticamente significativas no desempenho médio das configurações, determinando qual delas apresenta o melhor desempenho médio e avaliando a magnitude das diferenças encontradas. Os resultados são apresentados no contexto das questões técnicas de interesse, proporcionando recomendações baseadas nos achados experimentais.
 
 ## 1. Design do Experimento
 
-Para realizar a análise estatística, estabelecemos as seguintes hipóteses:
+A análise será conduzida a partir de um Experimento Completamente Aleatorizado com Blocos (RCBD), em que as instâncias do algoritmo são consideradas os blocos, e as configurações do algoritmo representam os tratamentos (níveis do fator de interesse). O objetivo é verificar se há diferenças estatisticamente significativas no desempenho médio entre as configurações do algoritmo, levando em conta a variabilidade atribuída às instâncias (blocos).
 
-- **Hipótese Nula (\(H_0\))**: Não existe diferença no valor médio dos retornos das ações, isto é, não existe diferença no tamanho dos efeitos $\tau_i$.
+## 1.1. Hipótese
+
+Para esse experimento, estamos interessados em investigar se há alguma diferença no desempenho médio do algoritmo quando equipado com diferentes configurações, para a classe de problemas de interesse. Portanto, para realizar a análise estatística, estabelecemos as seguintes hipóteses:
+
+- **Hipótese Nula (\(H_0\))**: Não há diferença no desempenho médio entre as configurações, isto é, não existe diferença no tamanho dos efeitos $\tau_i$.
 
 $$\begin{cases} H_0: \tau_i = 0, \ \forall i \in \{1,2,...,a\}\end{cases}$$
 
-- **Hipótese Alternativa (\(H_a\))**: Existe ao menos uma ação com um efeito significativamente diferente de zero, ou seja, com um retorno médio mensal superior às demais.
+- **Hipótese Alternativa (\(H_a\))**: Existe pelo menos uma configuração que apresenta um efeito significativamente diferente de zero, ou seja, com um desempenho superior.
 
 $$\begin{cases} H_1: \exists \ \tau_i \neq 0 \end{cases}$$
 
-Para testar a hipótese definida, será utilizado o teste ANOVA. Se decidirmos pela rejeição da hipótese nula e as premissas do teste ANOVA forem validadas, precisaremos determinar quais ações possuem retorno significamente maior do que as demais. Para isso, vamos realizar comparações múltiplas para identificar quais pares de ação diferem significativamente, utilizando o método de Tukey.
+Se decidirmos pela rejeição da hipótese nula e as premissas do teste forem validadas, precisaremos determinar qual configuração em termos de desempenho médio. Para responder a essa pergunta, pode-se realizar uma comparação todos contra todos, utilizando o teste de Tukey devido a sua sensibilidade superior ao fazer esse tipo de comparação.
+
+## 1.2. Tamanho amostral
+
+```{r repeticoes,message=FALSE}
+
+```
 
 ### 2. Descrição do conjunto de dados
 

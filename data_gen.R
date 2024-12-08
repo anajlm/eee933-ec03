@@ -5,10 +5,9 @@ if (!require("smoof")) install.packages("smoof", dependencies = TRUE)
 library(ExpDE)
 library(smoof)
 
-# Definir os parâmetros gerais
-set.seed(42) # Garantir reprodutibilidade
-num_instancias <- 30 # Número de dimensões a serem testadas
-repeticoes <- 10 # Número de repetições por dimensão
+#set.seed(42) # Garantir reprodutibilidade
+# Número de repetições
+repeticoes <- 10
 
 # Amostrar dimensões uniformemente no intervalo [2, 150]
 dim_amostras <- sample(2:3, 2, replace = TRUE)
