@@ -5,12 +5,17 @@ if (!require("smoof")) install.packages("smoof", dependencies = TRUE)
 library(ExpDE)
 library(smoof)
 
+#rm(list = ls()) 
+
 #set.seed(42) # Garantir reprodutibilidade
 # Número de repetições
 repeticoes <- 10
 
 # Amostrar dimensões uniformemente no intervalo [2, 150]
-dim_amostras <- sample(2:3, 2, replace = TRUE)
+dim_amostras <- c()#sample(2:3, 2, replace = TRUE)
+for (i in 0:14) {
+  dim_amostras<-rbind(dim_amostras,(2+i*10))
+}
 
 # Função para gerar funções de Rosenbrock para diferentes dimensões
 fn <- function(X){
@@ -20,13 +25,18 @@ fn <- function(X){
   return(Y)
 }
 
-# Config 1
+# Config 1 - Grupo A
 recpars1 <- list(name = "recombination_arith")
 mutpars1 <- list(name = "mutation_rand", f = 4)
 
-# Config 2
+# # Config 2
+# recpars2 <- list(name = "recombination_bin", cr = 0.7)
+# mutpars2 <- list(name = "mutation_best", f = 3)
+
+# Config 2 - Grupo - E config 2
 recpars2 <- list(name = "recombination_bin", cr = 0.7)
 mutpars2 <- list(name = "mutation_best", f = 3)
+
 
 # Tabela para armazenar resultados
 resultados <- data.frame(
@@ -36,10 +46,18 @@ resultados <- data.frame(
   Fbest = numeric()
 )
 
+iniExecucao<-Sys.time()
+message("Hora de inicio da execucao: ",iniExecucao)
 
 # Executar o experimento
 for (dim in dim_amostras) {
+  
+  
   for (rep in 1:repeticoes) {
+    iniRep<-Sys.time()
+    
+    message("Dimensao atual: ",dim, " Repeticao: ",rep)
+    
     # Gerar problema para a dimensão
     selpars <- list(name = "selection_standard")
     stopcrit <- list(names = "stop_maxeval", maxevals = 5000 * dim, maxiter = 100 * dim)
@@ -74,8 +92,17 @@ for (dim in dim_amostras) {
       data.frame(Dimensao = dim, Repeticao = rep, Configuracao = "Config1", Fbest = out1$Fbest),
       data.frame(Dimensao = dim, Repeticao = rep, Configuracao = "Config2", Fbest = out2$Fbest)
     )
+    
+    fimRep<-Sys.time()
+    message("Dim: ", dim, " rep: ", rep, " Duracao: ", difftime(fimRep,iniRep, units = c("mins")), " min")
+    
   }
 }
+fimExecucao<-Sys.time()
+message("Hora de fim da execucao: ",fimExecucao,
+        " \nDuracao: ", difftime(fimExecucao,iniExecucao, units = c("mins")), " min")
+
+
 
 # Salvar resultados em um arquivo CSV
 write.csv(resultados, "resultados_experimento.csv", row.names = FALSE)
