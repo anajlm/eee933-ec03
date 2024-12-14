@@ -1,5 +1,3 @@
-##### ESTUDO PILOTO ##### 
-
 # Instalar e carregar pacotes necessários
 if (!require("ExpDE")) install.packages("ExpDE", dependencies = TRUE)
 if (!require("smoof")) install.packages("smoof", dependencies = TRUE)
@@ -11,7 +9,7 @@ library(smoof)
 
 #set.seed(42) # Garantir reprodutibilidade
 # Número de repetições
-repeticoes <- 10
+repeticoes <- 30
 
 # Amostrar 28 dimensões uniformemente no intervalo [2, 150]
 # dim_amostras <- c()#sample(2:3, 2, replace = TRUE)
@@ -110,4 +108,4 @@ message("Hora de fim da execucao: ",fimExecucao,
 
 
 # Salvar resultados em um arquivo CSV
-write.csv(resultados, "estudo_piloto.csv", row.names = FALSE)
+write.csv(resultados, "estudo_piloto_2.csv", row.names = FALSE)

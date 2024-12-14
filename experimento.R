@@ -1,5 +1,3 @@
-##### ESTUDO PILOTO ##### 
-
 # Instalar e carregar pacotes necessários
 if (!require("ExpDE")) install.packages("ExpDE", dependencies = TRUE)
 if (!require("smoof")) install.packages("smoof", dependencies = TRUE)
@@ -7,24 +5,14 @@ if (!require("smoof")) install.packages("smoof", dependencies = TRUE)
 library(ExpDE)
 library(smoof)
 
-#rm(list = ls()) 
-
-#set.seed(42) # Garantir reprodutibilidade
-# Número de repetições
-repeticoes <- 10
-
-# Amostrar 28 dimensões uniformemente no intervalo [2, 150]
-# dim_amostras <- c()#sample(2:3, 2, replace = TRUE)
-# for (i in 0:14) {
-#   dim_amostras<-rbind(dim_amostras,(2+i*10))
-# }
-
-## Amostrar 28 dimensões uniformemente no intervalo [2, 150]
 # Gerar 28 valores uniformemente espaçados entre 2 e 150
 dim_amostras <- seq(2, 150, length.out = 28)
 # Arredondar para os valores inteiros mais próximos
 dim_amostras <- round(dim_amostras)
 print(dim_amostras)
+
+# Número de repetições por dimensao
+repeticoes <- c()
 
 # Função para gerar funções de Rosenbrock para diferentes dimensões
 fn <- function(X){
@@ -38,7 +26,7 @@ fn <- function(X){
 recpars1 <- list(name = "recombination_arith")
 mutpars1 <- list(name = "mutation_rand", f = 4)
 
-# Config 2 - Grupo - E config 2
+# Config 2 - Grupo E 
 recpars2 <- list(name = "recombination_bin", cr = 0.7)
 mutpars2 <- list(name = "mutation_best", f = 3)
 
@@ -57,7 +45,9 @@ message("Hora de inicio da execucao: ",iniExecucao)
 # Executar o experimento
 for (dim in dim_amostras) {
   
-  
+  # Numero de repeticoes para a dimensao atual
+  repeticoes <- 
+    
   for (rep in 1:repeticoes) {
     iniRep<-Sys.time()
     
@@ -68,7 +58,7 @@ for (dim in dim_amostras) {
     stopcrit <- list(names = "stop_maxeval", maxevals = 5000 * dim, maxiter = 100 * dim)
     probpars <- list(name = "fn", xmin = rep(-5, dim), xmax = rep(10, dim))
     popsize = 5 * dim
-  
+    
     # Configuração 1
     out1 <- ExpDE(
       mutpars = mutpars1,
@@ -110,4 +100,4 @@ message("Hora de fim da execucao: ",fimExecucao,
 
 
 # Salvar resultados em um arquivo CSV
-write.csv(resultados, "estudo_piloto.csv", row.names = FALSE)
+write.csv(resultados, "experimento.csv", row.names = FALSE)
