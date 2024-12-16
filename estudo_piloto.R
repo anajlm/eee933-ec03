@@ -9,7 +9,7 @@ library(smoof)
 
 #set.seed(42) # Garantir reprodutibilidade
 # Número de repetições
-repeticoes <- 30
+repeticoes <- 10
 
 # Amostrar 28 dimensões uniformemente no intervalo [2, 150]
 # dim_amostras <- c()#sample(2:3, 2, replace = TRUE)
@@ -32,14 +32,29 @@ fn <- function(X){
   return(Y)
 }
 
-# Config 1 - Grupo A
-recpars1 <- list(name = "recombination_arith")
+# # Config 1 - Grupo A
+# recpars1 <- list(name = "recombination_arith")
+# mutpars1 <- list(name = "mutation_rand", f = 4)
+
+# ## Config 1 - Grupo B
+# recpars1 <- list(name = "recombination_exp", cr = 0.6)
+# mutpars1 <- list(name = "mutation_best", f = 2)
+
+# ## Config 2 - Grupo A
+# recpars2 <- list(name = "recombination_bin", cr = 0.7)
+# mutpars2 <- list(name = "mutation_best", f = 3)
+
+# # Config 2 - Grupo - E config 2
+# recpars2 <- list(name = "recombination_bin", cr = 0.7)
+# mutpars2 <- list(name = "mutation_best", f = 3)
+
+## Config 1 - C
+recpars1 <- list(name = "recombination_blxAlphaBeta", alpha = 0, beta = 0)
 mutpars1 <- list(name = "mutation_rand", f = 4)
 
-# Config 2 - Grupo - E config 2
-recpars2 <- list(name = "recombination_bin", cr = 0.7)
-mutpars2 <- list(name = "mutation_best", f = 3)
-
+## Config 2 - D
+recpars2 <- list(name = "recombination_eigen", othername = "recombination_bin", cr = 0.9)
+mutpars2 <- list(name = "mutation_best", f = 2.8)
 
 # Tabela para armazenar resultados
 resultados <- data.frame(
@@ -108,4 +123,4 @@ message("Hora de fim da execucao: ",fimExecucao,
 
 
 # Salvar resultados em um arquivo CSV
-write.csv(resultados, "estudo_piloto_2.csv", row.names = FALSE)
+write.csv(resultados, "estudo_piloto_4.csv", row.names = FALSE)

@@ -6,13 +6,14 @@ library(ExpDE)
 library(smoof)
 
 # Gerar 28 valores uniformemente espaçados entre 2 e 150
-dim_amostras <- seq(2, 150, length.out = 28)
+dimensoes <- seq(2, 150, length.out = 28)
 # Arredondar para os valores inteiros mais próximos
-dim_amostras <- round(dim_amostras)
-print(dim_amostras)
+dimensoes <- round(dimensoes)
+print(dimensoes)
 
 # Número de repetições por dimensao
-repeticoes <- c()
+repeticoes_por_dimensao <- read.csv("repeticoes.csv")
+repeticoes_por_dimensao <- as.data.frame(repeticoes_por_dimensao)
 
 # Função para gerar funções de Rosenbrock para diferentes dimensões
 fn <- function(X){
@@ -22,13 +23,13 @@ fn <- function(X){
   return(Y)
 }
 
-# Config 1 - Grupo A
-recpars1 <- list(name = "recombination_arith")
+## Config 1 - C
+recpars1 <- list(name = "recombination_blxAlphaBeta", alpha = 0, beta = 0)
 mutpars1 <- list(name = "mutation_rand", f = 4)
 
-# Config 2 - Grupo E 
-recpars2 <- list(name = "recombination_bin", cr = 0.7)
-mutpars2 <- list(name = "mutation_best", f = 3)
+## Config 2 - D
+recpars2 <- list(name = "recombination_eigen", othername = "recombination_bin", cr = 0.9)
+mutpars2 <- list(name = "mutation_best", f = 2.8)
 
 
 # Tabela para armazenar resultados
@@ -43,10 +44,10 @@ iniExecucao<-Sys.time()
 message("Hora de inicio da execucao: ",iniExecucao)
 
 # Executar o experimento
-for (dim in dim_amostras) {
+for (dim in dimensoes) {
   
   # Numero de repeticoes para a dimensao atual
-  repeticoes <- 
+  repeticoes <- repeticoes_por_dimensao$Repeticoes[repeticoes_por_dimensao$Dimensao == dim]
     
   for (rep in 1:repeticoes) {
     iniRep<-Sys.time()

@@ -1,7 +1,7 @@
 ---
 title: 'Estudo de Caso 3 - Comparação de desempenho de duas configurações de um algoritmo de otimização'
 author: "Ana Júlia de Lima Martins, Antônio Carlos da Anunciação, Melchior Augusto Syrio de Melo"
-date: "16 de dezembro de 2024"
+date: "24 de dezembro de 2024"
 output:
   pdf_document:
     fig_caption: yes
@@ -12,6 +12,7 @@ output:
 ```{r setup,results='hide',warning=FALSE,echo=FALSE}
 # A few initial definitions just to make sure all required packages are installed. Change as needed.
 # NOTE: It may echo some weird messages to the PDF on the first compile (package installation messages). Run twice and the problem will (hopefully) go away.
+suppressPackageStartupMessages({
 if (!require(ggplot2, quietly = TRUE)){
       install.packages("ggplot2")
       }
@@ -32,11 +33,11 @@ if (!require(reshape2, quietly = TRUE)){
 }
 if (!require(multcomp, quietly = TRUE)){
       install.packages("multcomp")
-}
+}})
 ```
 ## Resumo
 
-Este relatório descreve uma análise estatística do desempenho de duas configurações distintas de um algoritmo de otimização baseado em evolução diferencial (DE). Neste experimento, aplicou-se um Experimento Completamente Aleatorizado com Blocos (RCBD) com o intuito de avaliar o desempenho das duas configurações em diferentes instâncias do problema. A análise teve como objetivo identificar se há diferenças estatisticamente significativas no desempenho médio das configurações, determinando qual delas apresenta o melhor desempenho médio e avaliando a magnitude das diferenças encontradas. Os resultados são apresentados no contexto das questões técnicas de interesse, proporcionando recomendações baseadas nos achados experimentais.
+Este relatório descreve uma análise estatística do desempenho de duas configurações distintas de um algoritmo de otimização baseado em evolução diferencial (DE). Neste experimento, aplicou-se um Experimento Completamente Aleatorizado com Blocos (RCBD) com o intuito de avaliar o desempenho das duas configurações em diferentes instâncias do problema. A análise teve como objetivo identificar se há diferenças estatisticamente significativas no desempenho médio das configurações, determinando qual delas apresenta o melhor desempenho médio e avaliando a magnitude das diferenças encontradas. Por fim, os resultados são apresentados, proporcionando recomendações baseadas nos achados experimentais.
 
 ## 1. Design do Experimento
 
@@ -58,27 +59,21 @@ Se decidirmos pela rejeição da hipótese nula e as premissas do teste forem va
 
 ## 1.2. Tamanho amostral
 
-A determinação do tamanho amostral necessário para um RCBD é similar ao procedimento para um CRD.
-
-
-An important aspect of designing an experiment is to know how many observations are needed to make conclusions of sufficient accuracy and with sufficient confidence. We review what we mean by this statement. The sample size needed depends on lots of things; including what type of experiment is being contemplated, how it will be conducted, resources, and desired sensitivity and confidence.
-
-Sensitivity refers to the difference in means that the experimenter wishes to detect, i.e., sensitive enough to detect important differences in the means.
-
-Generally, increasing the number of replications increases the sensitivity and makes it easier to detect small differences in the means. Both power and the margin of error are a function of n and a function of the error variance. Most of this course is about finding techniques to reduce this unexplained residual error variance, and thereby improving the power of hypothesis tests, and reducing the margin of error in estimation.
-
+Nesta seção, discutimos a definição do número de instâncias e de repetições necessárias para o experimento, a fim de obter um poder do teste de pelo menos $\pi^* = 0,8$, para detectar diferenças iguais ou superiores a um tamanho de efeito minimamente relevante $d^* = 0,5$, com nível de significância $\alpha = 0,05$.
 
 ### 1.2.1. Estimando o número de instâncias (blocos)
-
-Nesta seção, discutimos a definição do número de repetições necessárias para o experimento, a fim de obter um poder do teste de pelo menos $\pi^* = 0,8$, para detectar diferenças iguais ou superiores a um tamanho de efeito minimamente relevante $d^* = 0,5$, com nível de significância $\alpha = 0,05$.
 
 Sob a hipótese alternativa H1, a estatística $t_0$ segue uma distribuição t não central (Mathews, 2010) com parâmetro de não centralidade dado por:
 
 $$ncp = \frac{(\mu_D - \mu_0) \sqrt{N}}{\hat{\sigma}_{\Phi}} = \frac{\delta \sqrt{N}}{\hat{\sigma}_\Phi} = d \sqrt{N}.$$
+em que $N$ é o número de instâncias necessárias.
 
-Assumindo uma medida de relevância mínima  $d^* = |\delta^*| / \sigma_{\Phi}$, o poder do teste é dado pela integral da distribuição t não central com $ncp^* = d^* \sqrt{N}$ sobre os valores de $t_0$ para os quais a hipótese nula $H_0$ é rejeitada.
+Assumindo uma medida de relevância mínima  $d^* = |\delta^*| / \sigma_{\Phi}$, o poder do teste $\pi^*$ é dado pela integral da distribuição t não central com $ncp^* = d^* \sqrt{N}$ sobre os valores de $t_0$ para os quais a hipótese nula $H_0$ é rejeitada (Campelo et. al., 2019):
 
-O tamanho da amostra para este teste pode ser calculado como o menor inteiro tal que a potência $\pi^*$ é igual ou maior que a potência desejada. No caso da hipótese alternativa unilateral, temos que:
+$$\pi^* = 1 - \beta^* = 1 - \int_{t = t^{(N-1)}_{\alpha/2}}^{t^{(N-1)}_{1-\alpha/2}} \left[ t^{(N-1)}_{\,|\, \text{ncp}^*|} \right] dt$$
+Finalmente, o número de instâncias pode ser calculado como o menor inteiro $N$ tal que o poder do teste $\pi^*$ seja igual ou maior que o poder desejado. No caso da hipótese alternativa unilateral, temos que:
+
+$$N^* = \min N \, \bigg| \, t^{(N-1)}_{1-\alpha} \leq t^{(N-1)}_{\beta^* \, ; \, |\text{ncp}^*|}$$
 
 
 ```{r blocos,message=FALSE}
@@ -92,7 +87,7 @@ while (power < 0.8)
 {
   df <- n - 1         # n - 1 graus de liberdade
   ncp <- d * sqrt(n)  # Non-centrality parameter
-  
+
   power <- pt(qt(p,df), df, ncp=ncp, lower.tail=FALSE)
   n <- n + 1
 }
@@ -103,20 +98,46 @@ power
 
 ### 1.2.2. Estimando o número de repetições por bloco
 
-Para calcular o número de repetições necessário por bloco, podemos utilizar a fórmula clássica da estatística para o tamanho de amostra em estimativas de média
+A abordagem proposta para calcular o número de repetições para o RCBD é similar ao procedimento para um CRD (_Completely Randomized Design_).
 
-he proposed strategy to calculate the number of runs of each algorithm ai on a given
-instance γ j , (i.e., the number of repetitions, n i j ) consists in
+Para o CRD, o parâmetro de não-centralidade é definido como:
 
-Any of the techniques discussed in Section 3.7 for selecting the number of repli-
-cates to run in a completely randomized single-factor experiment may be applied directly to
-the RCBD.
+$$\delta^2 = \frac{n \sum_{i=1}^a (\mu_i - \mu)^2}{\sigma^2}$$
+A variabilidade intra-grupo, necessária para calcular o _ncp_, corresponde a variância residual estimada, i.e., a variabilidade não explicada pelo fator experimental e pelo fator bloqueado. Neste experimento, essa variabilidade foi estimada a partir de um estudo piloto com 30 repetições por bloco.
 
-A variabilidade intra-grupo, necessária para calcular o tamanho amostral necessário, corresponde a variância residual estimada, i.e., a variabilidade não explicada pelo fator experimental e pelo fator bloqueado. Essa variabilidade pode ser estimada a partir de um estudo piloto ou informações de estudos passados.
+Uma vez definido o _ncp_, a estatística F segue a seguinte distribuição:
+
+$$F \sim\begin{cases}  F_{a-1, a(n-1)} & \text{sob } H_0 \\ F_{a-1, a(n-1), \delta^2} & \text{sob } H_1 \end{cases}$$
+
+O valor crítico $F^*$ para rejeitar $H_0$ com nível de significância $\alpha = 0,05$ é dado por:
+
+$$F^* = F_{a-1, a(n-1), \alpha}$$
+
+Esse valor pode ser calculado usando o seguinte comando em R:
+
+```r
+F.crit <- qf(alpha, a-1, a*(n-1), lower.tail = FALSE) # syntax
+```
+
+Por definição, o poder do teste é a probabilidade de rejeitar a hipótese nula ($H_0$) quando a hipótese alternativa $H_1$ é verdadeira:
+
+$$\text{Poder} = P(\text{Rejeitar } H_0 | H_1 \text{ é verdadeira}).$$
+
+Isso é equivalente a:
+
+$$P(F(a-1, a(n-1), \delta^2) \geq F^*)$$
+Sendo assim, o poder do teste pode ser calculado usando o seguinte comando:
+
+```r
+power <- pf(F.crit, a-1, a*(n-1), ncp = ncp, lower.tail = FALSE) # syntax
+```
+
+A estratégia consiste em variar o número de repetições $n$, considerando $a = 2$ níveis do fator de interesse, até obter um poder do teste igual ou superior ao poder desejado ($\pi \geq 0,8$)
+
 
 ```{r repeticoes,message=FALSE}
 # Carregar a tabela de resultados
-estudo_piloto <- read.csv("estudo_piloto.csv")
+estudo_piloto <- read.csv("estudo_piloto_4.csv")
 
 # Criar um dicionário (ou lista) para armazenar os resultados
 estatisticas_piloto <- list()
@@ -128,11 +149,11 @@ dimensoes <- unique(estudo_piloto$Dimensao)
 for (dim in dimensoes) {
   # Filtrar os dados para a dimensão atual
   dados_dimensao <- subset(estudo_piloto, Dimensao == dim)
-  
+
   # Calcular variância e desvio padrão de Fbest
   variancia <- var(dados_dimensao$Fbest)
   desvio_padrao <- sd(dados_dimensao$Fbest)
-  
+
   # Salvar no dicionário (como uma lista com os dois valores)
   estatisticas_piloto[[as.character(dim)]] <- list(
     Variancia = variancia,
@@ -148,64 +169,57 @@ estatisticas_piloto_df <- data.frame(
 ```
 
 
-Now we can use the OC curves exactly as in Example 3.10. Suppose we try n  4 repli-
-cates. This results in  2  1.125(4)  4.5,   2.12, and 4(3)  12 degrees of freedom for
-error. From the OC curve, we ﬁnd that the power is approximately 0.65. For n  5 replicates,
-we have  2  5.625,   2.37, and 4(4)  16 degrees of freedom for error. From the OC
-curve, the power is approximately 0.8. For n  6 replicates, we have  2  6.75,   2.60,
-and 4(5)  20 degrees of freedom for error. From the OC curve, the power exceeds 0.90, so
-n  6 replicates are required.
-
 ```{r repeticoes2,message=FALSE}
 alpha <- 0.05 # nível de significância
 d <- 0.5
 a <- 2 # Niveis do fator
+n_max <- 100 # Número máximo de epetições por instância
 
 # Dataframe para armazenar os resultados
 repeticoes <- data.frame(
   Dimensao = integer(),
-  Repeticoes = integer()
+  Repeticoes = integer(),
+  Poder = numeric()
 )
 
 for (dim in dimensoes) {
-  # Calcula n para cada dimensão para atingir poder ≥ 0.95
-  print(dim)
+  # Calcula n para cada dimensão para atingir poder >= 0.8
   n <- 2
   power <- 0
   sd <- estatisticas_piloto_df$DesvioPadrao[estatisticas_piloto_df$Dimensao == dim]
-  print(sd)
-  D <- d * sd
-  print(D)
-  
+
   while (power < 0.8)
   {
     df1 <- a - 1 # Graus de liberdade do numerador
     df2 <- a * (n - 1) # Graus de liberdade do denominador
-    #ncp <- (n * D^2) / (2 * sd^2) # Non-centrality parameter
-    estudo_piloto
-    # Calcular as médias observadas para a dimensão atual
-    mu_config1 <- mean(estudo_piloto$Fbest[estudo_piloto$Dimensao == dim & 
+    
+    # Calcula as médias observadas para a dimensão atual
+    mu_config1 <- mean(estudo_piloto$Fbest[estudo_piloto$Dimensao == dim &
                                            estudo_piloto$Configuracao == "Config1"])
-    mu_config2 <- mean(estudo_piloto$Fbest[estudo_piloto$Dimensao == dim & 
+    mu_config2 <- mean(estudo_piloto$Fbest[estudo_piloto$Dimensao == dim &
                                            estudo_piloto$Configuracao == "Config2"])
-  
-    # Estimação da média geral e do desvio padrão
-    mu <- mean(c(mu_config1, mu_config2))  # Média geral
-    
+    # Média global
+    mu <- mean(c(mu_config1, mu_config2))
+
     # Calcula o NCP
-    ncp <- (n*((mu_config1 - mu)^2 + (mu_config2 - mu)^2)) / (2 * (sd^2))
-    print(ncp)
-    
-    F.crit <- qf(1 - alpha, df1, df2, lower.tail = FALSE)
-    print(F.crit)
-    
+    ncp <- (n*((mu_config1 - mu)^2 + (mu_config2 - mu)^2)) / (sd^2)
+
+    F.crit <- qf(alpha, df1, df2, lower.tail = FALSE)
+
     power <- pf(F.crit, df1, df2, ncp, lower.tail = FALSE)
-    print(power)
-    n = n + 1
+    
+    if (n >= n_max) {
+      break
+    } else {
+      n = n + 1
+    }
   }
-  
+
   # Armazena os resultados no dataframe
-  repeticoes <- rbind(repeticoes, data.frame(Dimensao = dim, Repeticoes = n))
+  repeticoes <- rbind(repeticoes, data.frame(Dimensao = dim, Repeticoes = n, Poder = power))
+  # Salvar resultados em um arquivo CSV
+  write.csv(repeticoes, "repeticoes.csv", row.names = FALSE)
+
 }
 ```
 
@@ -248,36 +262,52 @@ for (dim in dimensoes) {
 <!-- ``` -->
 
 
-<!-- ## 3. Análise Exploratória -->
+## 3. Análise Exploratória
 
-<!-- Antes de realizar os testes de hipótese, foi realizada uma análise exploratória para obter uma visão geral dos dados. A Figura @ref(fig:boxplot) fornece um boxplot para comparar as distribuições dos retornos das ações. -->
-
-<!-- ```{r boxplot,fig.width=8,echo=TRUE,message=FALSE,fig.cap="Retorno das Ações (dados originais + boxplots)"} -->
-
-<!-- # Boxplot dos retornos -->
-<!-- ggplot(retornos_melt, -->
-<!--        aes(x = Acoes, y = Retorno, fill = Acoes)) + -->
-<!--     geom_boxplot() + -->
-<!--     geom_point() + -->
-<!--     ggtitle("Retorno das Ações", -->
-<!--             "(dados originais + boxplots)") + -->
-<!--     theme(legend.position = "none") -->
-<!-- ``` -->
-
-<!-- A análise gráfica indica que a Ação 1 aparenta apresentar o maior retorno médio entre as ações analisadas. -->
+Antes de realizar os testes de hipótese, foi realizada uma análise exploratória para obter uma visão geral dos dados. A Figura @ref(fig:dataplot) fornece um gráfico para comparar o desempenho médio das duas configuração por dimensão.
 
 
-<!-- ## 4. Análise Estatística -->
+```{r dataplot,fig.width=8,echo=TRUE,message=FALSE,label="dataplot",fig.cap="Desempenho médio das configurações por instância"}
+# Load data
+data <- read.csv("estudo_piloto_4.csv")
+# Aggregate data (algorithm means by instance group)
+aggdata <- with(data, aggregate(x = Fbest, by = list(Configuracao, Dimensao), FUN = mean))
+names(aggdata) <- c("Configuracao", "Dimensao", "Y")
 
-<!-- Para validar nossas observações iniciais, realizamos um teste ANOVA para avaliar as diferenças nos retornos das ações. -->
+library(ggplot2)
 
-<!-- ```{r fitmodel,results='hold'} -->
-<!-- retornos_melt$Acoes <- as.factor(retornos_melt$Acoes) -->
-<!-- model <- aov(Retorno ~ Acoes, data = retornos_melt) -->
-<!-- summary(model) -->
-<!-- ``` -->
+# png(filename = "../figs/algo_lineplot.png",
+#     width = 1000, height = 400,
+#     bg = "transparent")
+p <- ggplot(aggdata, aes(x = Dimensao,
+                         y = Y,
+                         group = Configuracao,
+                         colour = Configuracao))
+p + geom_line(linetype=2) + geom_point(size=5)
+# dev.off()
+```
 
-<!-- Como resultado do teste, obteve-se uma estatística F = 34,45 e um p-valor < 2e-16.  -->
+A análise gráfica indica que a Configuração X apresenta
+
+
+## 4. Análise Estatística
+
+Para validar nossas observações iniciais, realizamos um teste RCBD para avaliar as diferenças no desempenho das duas configurações.
+
+```{r fitmodel,results='hold'}
+model <- aov(Y~Configuracao+Dimensao, data=aggdata)
+summary(model)
+summary.lm(model)$r.squared
+```
+
+A Figura @ref(modelplot) mostra o modelo resultante do teste estatístico.
+
+```{r modelplot,results='hold',label="modelplot"}
+par(mfrow = c(2, 2))
+plot(model, pch = 20, las = 1)
+```
+
+<!-- Como resultado do teste, obteve-se uma estatística F = 34,45 e um p-valor < 2e-16. -->
 
 <!-- Diante do resultado do teste ANOVA, podemos rejeitar, com nível de significância $\alpha = 0,05$, a hipótese nula de que as médias de retorno das cinco ações são iguais. -->
 
@@ -288,13 +318,13 @@ for (dim in dimensoes) {
 <!-- # Comparações múltiplas -->
 <!-- library(multcomp) -->
 
-<!-- mc1    <- glht(model,  -->
+<!-- mc1    <- glht(model, -->
 <!--                linfct = mcp(Acoes = "Tukey")) -->
 <!-- summary(mc1) -->
 <!-- mc1_CI <- confint(mc1, level = 0.95) -->
 
 <!-- par(mar = c(5, 10, 4, 2)) # margens -->
-<!-- plot(mc1_CI,  -->
+<!-- plot(mc1_CI, -->
 <!--      xlab       = "Retornos", -->
 <!--      cex.axis   = 1.2, -->
 <!--      cex        = 2, -->
@@ -303,7 +333,7 @@ for (dim in dimensoes) {
 
 <!-- As comparações mais significativas são entre a Ação 2 e as Ações 1, 3, 4 e 5, todas com p-valor < 0,001, indicando que essas ações têm médias de retorno significativamente diferentes. As Ações 1, 3, 4 e 5, por sua vez, apresentam pelo menos uma diferença não significativa quando comparadas entre si. -->
 
-<!-- Confirmando a suspeita inicial, o teste de Tukey indica que a Ação 2 tem o maior retorno médio entre as ações analisadas, visto que as comparações entre a Ação 2 e as outras ações todas mostram diferenças significativas. -->
+Confirmando a suspeita inicial, o teste de Tukey indica que a Ação 2 tem o maior retorno médio entre as ações analisadas, visto que as comparações entre a Ação 2 e as outras ações todas mostram diferenças significativas.
 
 <!-- ### 5. Verificação das Premissas do Modelo -->
 <!-- The assumptions of your test should also be validated, and possible effects of violations should also be explored. -->
@@ -352,3 +382,9 @@ for (dim in dimensoes) {
 <!-- - Ana Julia: Design do experimento, análise estatística, análise exploratória e descrição do conjunto de dados (redação e código)  -->
 <!-- - Antônio:  -->
 <!-- - Melchior: -->
+
+### 8. Referências
+
+[1] Mathews, P.: Sample Size Calculations: Practical Methods for Engineers and Scientists, 1st edn. Matthews Malnar & Bailey Inc., Fairport Harbor (2010)
+
+[2] Campelo, F., Takahashi, F. Sample size estimation for power and accuracy in the experimental comparison of algorithms. J Heuristics 25, 305–338 (2019). https://doi.org/10.1007/s10732-018-9396-7
